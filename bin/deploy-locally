@@ -1,0 +1,33 @@
+#!/bin/bash
+
+APP_NAME="xxx.xxx.xxx"
+APP_HOST="xx@xx.xx.xx.xx"
+APP_PATH="/var/www/xxx.xxx.xxx"
+ts=`date +%s`
+fn="$APP_NAME-$ts.zip"
+# create temp directory for final archive
+rm -rf tmp
+npm run build
+mkdir tmp
+find ./ -path '*/src/*' -prune -o -path '*/test/*' -prune -o -path '*/static/*' -prune -o -path '*/node_modules/*' -prune -o -path '*/\.git*' -prune -o -type f -print | xargs -I % rsync -R % tmp
+ditto -ck --sequesterRsrc tmp/ $fn
+# Copy the app to lightsail ftp
+sftp $APP_HOST << EOF
+cd $APP_PATH
+put -r $fn
+bye
+EOF
+ssh -t $APP_HOST << EOF
+cd $APP_PATH
+unzip -o $fn
+rm $fn
+~/.npm-global/bin/pm2 stop $APP_NAME
+npm i --production
+NODE_ENV="production" ~/.npm-global/bin/pm2 start pm2.config.js
+logout
+EOF
+echo "Done! Deployed version"
+echo "Cleaning up archive ..."
+rm -rf tmp
+rm $fn
+echo 'Archive cleaned!'
