@@ -22,7 +22,6 @@ instance.interceptors.response.use(function (response) {
 })
 
 class Api {
-
   async useApiExample () {
     let { data } = await instance.get('public/getSample')
     return data
