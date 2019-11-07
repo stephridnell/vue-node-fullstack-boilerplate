@@ -1,3 +1,5 @@
+deprecated - all packages super out of date now.
+
 # Vue.js Frontend + Node.js API Fullstack Boilerplate
 
 Front end was templated using vue-cli 2 using the webpack template and is using webpack version 3.4.1.
